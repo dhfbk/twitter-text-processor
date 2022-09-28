@@ -14,4 +14,7 @@ spacy download en_core_web_lg
 spacy download it_core_news_lg
 ...
 ```
-
+Finally, you can run the server:
+```
+python3 server.py
+```
