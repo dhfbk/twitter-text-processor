@@ -1,5 +1,6 @@
 from ekphrasis.classes.preprocessor import TextPreProcessor
 from ekphrasis.classes.tokenizer import SocialTokenizer
+from ekphrasis.dicts.emoticons import emoticons
 from diff_match_patch import diff_match_patch
 import os
 import spacy
@@ -8,6 +9,21 @@ import re
 
 class Language:
     stopwords_folder = "resources/stopwords"
+    old_emoticons = {
+        "<angel>": "😇",
+        "<annoyed>": "😒",
+        "<devil>": "😈",
+        "<happy>": "🙂",
+        "<heart>": "❤",
+        "<highfive>": "🙌",
+        "<kiss>": "😗",
+        "<laugh>": "😂",
+        "<sad>": "☹",
+        "<seallips>": "🤐",
+        "<surprise>": "😲",
+        "<tong>": "😛",
+        "<wink>": "😉"
+    }
 
     def __init__(self, name, section):
         self.name = name
@@ -26,7 +42,7 @@ class Language:
     def loadModels(self):
         if self.convert_hashtags:
             self.text_processor = TextPreProcessor(
-                normalize=['url', 'email', 'percent', 'money', 'phone', 'user', 'time', 'url', 'date', 'number'],
+                normalize=['url', 'email', 'percent', 'money', 'phone', 'user', 'time', 'date', 'number'],
                 fix_html=True,
                 segmenter=self.name,
                 corrector=self.name,
@@ -35,6 +51,8 @@ class Language:
                 spell_correct_elong=False,
                 spell_correction=False,
                 tokenizer=SocialTokenizer(lowercase=True).tokenize,
+                remove_tags=True,
+                dicts=[emoticons]
                 )
 
         if self.convert_emoji:
@@ -76,6 +94,12 @@ class Language:
         text = re.sub(r'[u][u]+([^A-Za-z])', 'u\g<1>', text)
         text = re.sub(r'[u][u]+$', 'u', text)
         return text
+
+    def replaceOldEmoticon(self, match):
+        if match.group(0) in self.old_emoticons:
+            return self.old_emoticons[match.group(0)]
+        else:
+            return match.group(0)
 
     def replaceEmoji(self, match):
         delimiters = (' ', ' ')
@@ -151,7 +175,7 @@ class Language:
 
         else:   
             for d in diff:
-                if d[0] is not 0:
+                if d[0] != 0:
                     betweenzerolist.append(d)
 
                 else:
@@ -177,14 +201,15 @@ class Language:
         if self.remove_ending_elongated:
             text = self.removeEndingElongated(text)
 
-        if self.convert_emoji:
-            text = self.emojiSubstitution(text)
-
         if self.convert_hashtags:
             text = re.sub('#', ' #', text)
             text = text.lower()
             text = ' '.join(self.text_processor.pre_process_doc(text))
+            text = re.sub(r"<[a-z]+>", self.replaceOldEmoticon, text)
         
+        if self.convert_emoji:
+            text = self.emojiSubstitution(text)
+
         text = re.sub(r'\s+', ' ', text)
 
         if self.restore_case:
