@@ -1,0 +1,5 @@
+ekphrasis==0.5.*
+diff_match_patch==20200713
+spacy==3.4.*
+fastapi==0.85.*
+uvicorn[standard]==0.18.*
