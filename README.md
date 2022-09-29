@@ -18,3 +18,5 @@ Finally, you can run the server:
 ```
 python3 server.py
 ```
+
+Authors: Stefano Menini ([menini@fbk.eu](mailto:menini@fbk.eu)) and Alessio Palmero Aprosio ([aprosio@fbk.eu](mailto:aprosio@fbk.eu)).
